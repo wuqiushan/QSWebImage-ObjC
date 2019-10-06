@@ -1,5 +1,5 @@
 //
-//  LruDictionary.h
+//  LruCache.h
 //  QSWebImage
 //
 //  Created by apple on 2019/10/2.
@@ -10,11 +10,19 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface LruDictionary : NSObject
+@interface LruCache : NSObject
 
 - (id)get:(NSString *)key;
 - (void)putKey:(NSString *)key value:(id)value;
+- (void)removeWithKey:(NSString *)key;
 - (void)removeTail;
+
+- (NSString *)getHeadKey;
+- (id)getHeadValue;
+- (NSString *)getTailKey;
+- (id)getTailValue;
+
+- (NSMutableDictionary *)dic;
 
 @end
 

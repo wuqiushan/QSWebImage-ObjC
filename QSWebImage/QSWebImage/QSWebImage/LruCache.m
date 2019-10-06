@@ -1,15 +1,15 @@
 //
-//  LruDictionary.m
+//  LruCache.m
 //  QSWebImage
 //
 //  Created by apple on 2019/10/2.
 //  Copyright © 2019年 wuqiushan. All rights reserved.
 //
 
-#import "LruDictionary.h"
+#import "LruCache.h"
 #import "LruNode.h"
 
-@interface LruDictionary()
+@interface LruCache()
 
 
 /**
@@ -25,7 +25,7 @@
 
 @end
 
-@implementation LruDictionary
+@implementation LruCache
 
 
 /**
@@ -44,7 +44,7 @@
     
     [self removeNode:currNode];
     [self addHead:currNode];
-    return currNode;
+    return currNode.value;
 }
 
 
@@ -76,7 +76,15 @@
     [self removeNode:self.tail];
 }
 
-
+/**
+ 删除指定的节点，通过key
+ 
+ */
+- (void)removeWithKey:(NSString *)key {
+    
+    LruNode *node = [self.dic objectForKey:key];
+    [self removeNode:node];
+}
 
 /**
  删除指定的节点
@@ -157,6 +165,20 @@
         _dic = [[NSMutableDictionary alloc] init];
     }
     return _dic;
+}
+
+- (NSString *)getHeadKey {
+    return self.head.key;
+}
+- (id)getHeadValue {
+    return self.head.value;
+}
+
+- (NSString *)getTailKey {
+    return self.tail.key;
+}
+- (id)getTailValue {
+    return self.tail.value;
 }
 
 @end

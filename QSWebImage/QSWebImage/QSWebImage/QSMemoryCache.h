@@ -12,6 +12,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface QSMemoryCache : NSObject
 
+- (instancetype)init;
+- (instancetype)initWithMaxMemorySize:(long long)size;
+- (void)writeFileWithName:(NSString *)name content:(NSData *)data;
+- (NSData *)readFileWithName:(NSString *)name;
+
 @end
 
 NS_ASSUME_NONNULL_END
