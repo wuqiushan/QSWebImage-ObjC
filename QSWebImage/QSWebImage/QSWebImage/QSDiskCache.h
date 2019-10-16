@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface QSDiskCache : NSObject
 
 - (instancetype)init;
-- (instancetype)initWithStorePath:(NSString *)path maxStoreSize:(long long)size;
+- (instancetype)initWithStorePath:(NSString * _Nullable)path maxStoreSize:(long long)size;
 - (void)writeFileWithName:(NSString *)name content:(NSData *)data;
 - (NSData *)readFileWithName:(NSString *)name;
 

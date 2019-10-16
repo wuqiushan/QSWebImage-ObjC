@@ -47,41 +47,61 @@
  */
 - (void)imageDataWithUrl:(NSString *)url setImageView:(UIImageView *)imgeView {
     
-    NSString *md5Key = [self md5_32bit:url];
-    __block NSData *resultData = nil;
-    resultData = [self.memoryCache readFileWithName:md5Key];
-    if (resultData) {
-        imgeView.image = [UIImage imageWithData:resultData];
-        return ;
-    }
-    resultData = [self.dishCache readFileWithName:md5Key];
-    if (resultData) {
-        imgeView.image = [UIImage imageWithData:resultData];
-        [self.memoryCache writeFileWithName:md5Key content:resultData];
-        return ;
-    }
-    [self.downloadImage GET:url param:nil success:^(id  _Nonnull rspObject) {
-        if ([rspObject isKindOfClass:[NSData class]]) {
-            
-            resultData = (NSData *)rspObject;
-            NSLog(@"%ld %@", resultData.length, resultData);
+    __weak typeof(self) weakSelf = self;
+    NSBlockOperation *blockOperation = [NSBlockOperation blockOperationWithBlock:^{
+        
+        NSLog(@"1001 - %@", [NSThread currentThread]);
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        
+        NSString *md5Key = [strongSelf md5_32bit:url];
+        __block NSData *resultData = nil;
+        resultData = [strongSelf.memoryCache readFileWithName:md5Key];
+        if (resultData) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 imgeView.image = [UIImage imageWithData:resultData];
             });
+            return ;
+        }
+        resultData = [strongSelf.dishCache readFileWithName:md5Key];
+        if (resultData) {
             
-            [self.dishCache writeFileWithName:md5Key content:resultData];
-            [self.memoryCache writeFileWithName:md5Key content:resultData];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                imgeView.image = [UIImage imageWithData:resultData];
+            });
+            [strongSelf.memoryCache writeFileWithName:md5Key content:resultData];
+            return ;
         }
         
-    } failure:^(NSError * _Nonnull error) {
-        NSLog(@"请求失败 %@", error);
+        [strongSelf.downloadImage GET:url param:nil success:^(id _Nonnull rspObject) {
+            
+            if ([rspObject isKindOfClass:[NSData class]]) {
+                
+                resultData = (NSData *)rspObject;
+                //NSLog(@"%ld %@", resultData.length, resultData);
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    imgeView.image = [UIImage imageWithData:resultData];
+                });
+                
+                [strongSelf.dishCache writeFileWithName:md5Key content:resultData];
+                [strongSelf.memoryCache writeFileWithName:md5Key content:resultData];
+            }
+            
+        } failure:^(NSError * _Nonnull error) {
+            NSLog(@"请求失败 %@", error);
+        }];
     }];
+    
+    // 最大并发线程数为20，把任务添加到队列后，不占用主队列
+    NSOperationQueue *operationQueue = [[NSOperationQueue alloc] init];
+    operationQueue.maxConcurrentOperationCount = 20;
+    [operationQueue addOperation:blockOperation];
 }
 
 
 
-/** MD5化 */
+#pragma mark MD5方法
 - (NSString *)md5_32bit:(NSString *)input {
     //传入参数,转化成char
     const char * str = [input UTF8String];

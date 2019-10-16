@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface LruNode : NSObject  
 
-@property (nonatomic, strong) NSString *key;
+@property (nonatomic, copy) NSString *key;
 @property (nonatomic, strong) id value;
 @property (nonatomic, strong, nullable) LruNode *prev;
 @property (nonatomic, strong, nullable) LruNode *next;

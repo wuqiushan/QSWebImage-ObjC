@@ -5,9 +5,17 @@
 //  Created by apple on 2019/10/2.
 //  Copyright © 2019年 wuqiushan. All rights reserved.
 //
+/**
+ os_unfair_lock_t unfairLock;
+ unfairLock = &(OS_UNFAIR_LOCK_INIT);
+ os_unfair_lock_lock(unfairLock);
+ os_unfair_lock_unlock(unfairLock);
+ */
 
 #import "LruCache.h"
 #import "LruNode.h"
+#import <os/lock.h>
+
 
 @interface LruCache()
 
@@ -25,8 +33,18 @@
 
 @end
 
+os_unfair_lock unfairLock;
+
 @implementation LruCache
 
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        unfairLock = OS_UNFAIR_LOCK_INIT;
+    }
+    return self;
+}
 
 /**
  获取元素,
@@ -98,6 +116,7 @@
     
     if (node == nil) { return ; }
     
+    os_unfair_lock_lock(&unfairLock);
     // 要删除元素时，1个节点、2个节点、多个节点 三种情况
     if (node == self.head) {
         if (node == self.tail) {
@@ -125,6 +144,7 @@
         nextNode.prev = prevNode;
     }
     [self.dic removeObjectForKey:node.key];
+    os_unfair_lock_unlock(&unfairLock);
 }
 
 
@@ -138,6 +158,9 @@
 - (void)addHead:(LruNode *)node {
     
     if (node == nil) { return ; }
+    
+    os_unfair_lock_lock(&unfairLock);
+    
     node.prev = nil;
     node.next = nil;
     
@@ -157,6 +180,8 @@
         temp.prev = self.head;
     }
     [self.dic setObject:node forKey:node.key];
+    
+    os_unfair_lock_unlock(&unfairLock);
 }
 
 #pragma mark - 懒加载
@@ -168,17 +193,29 @@
 }
 
 - (NSString *)getHeadKey {
-    return self.head.key;
+    if (self.head) {
+        return self.head.key;
+    }
+    return nil;
 }
 - (id)getHeadValue {
-    return self.head.value;
+    if (self.head) {
+        return self.head.value;
+    }
+    return nil;
 }
 
 - (NSString *)getTailKey {
-    return self.tail.key;
+    if (self.tail) {
+        return self.tail.key;
+    }
+    return nil;
 }
 - (id)getTailValue {
-    return self.tail.value;
+    if (self.tail) {
+        return self.tail.value;
+    }
+    return nil;
 }
 
 @end

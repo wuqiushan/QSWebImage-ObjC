@@ -9,6 +9,7 @@
 #import "QSDiskCache.h"
 #import "LruCache.h"
 #import "LruNode.h"
+#import <os/lock.h>
 
 /*
  存储数据到硬盘, 操作io口
@@ -17,6 +18,7 @@
  计算单个文件的总大小
  读取当前硬盘大小，一般是程序启动时读一下
  */
+//os_unfair_lock_t unfairLock;
 
 @interface QSDiskCache()
 
@@ -37,13 +39,15 @@
     return [self initWithStorePath:nil maxStoreSize:0];
 }
 
-- (instancetype)initWithStorePath:(NSString *)path maxStoreSize:(long long)size
+- (instancetype)initWithStorePath:(NSString * _Nullable)path maxStoreSize:(long long)size
 {
     self.storePath = path;
     self.maxStoreSize = size;
     
     self = [super init];
     if (self) {
+        
+//        unfairLock = &(OS_UNFAIR_LOCK_INIT);
         
         if (self.maxStoreSize == 0) {
             self.maxStoreSize = 500 * 1024;
@@ -86,23 +90,27 @@
  */
 - (void)writeFileWithName:(NSString *)name content:(NSData *)data {
     
-    [self removeFileWithName:name];
-    NSString *filePath = [self.storePath stringByAppendingPathComponent:name];
-    BOOL isSuccess = [self.fileManager createFileAtPath:filePath contents:data attributes:nil];
-    NSAssert(isSuccess == true, @"写入文件失败");
-    
-    // 如果文件总大小超过域值就是循环去删除，直到文件合理
-    if (isSuccess) {
-        // 读出存储文件的大小
-        long long fileSize = [self getFileSize:name];
-        self.useStoreSize += fileSize;
-        [self.lruCache putKey:name value:[NSNumber numberWithLongLong:fileSize]];
+//    os_unfair_lock_lock(unfairLock);
+    @synchronized (self) {
+        [self removeFileWithName:name];
+        NSString *filePath = [self.storePath stringByAppendingPathComponent:name];
+        BOOL isSuccess = [self.fileManager createFileAtPath:filePath contents:data attributes:nil];
+        NSAssert(isSuccess == true, @"写入文件失败");
         
-        while (self.useStoreSize > self.maxStoreSize) {
-            NSString *tailKey = [self.lruCache getTailKey];
-            [self removeFileWithName:tailKey];
+        // 如果文件总大小超过域值就是循环去删除，直到文件合理
+        if (isSuccess) {
+            // 读出存储文件的大小
+            long long fileSize = [self getFileSize:name];
+            self.useStoreSize += fileSize;
+            [self.lruCache putKey:name value:[NSNumber numberWithLongLong:fileSize]];
+            
+            while (self.useStoreSize > self.maxStoreSize) {
+                NSString *tailKey = [self.lruCache getTailKey];
+                [self removeFileWithName:tailKey];
+            }
         }
     }
+//    os_unfair_lock_unlock(unfairLock);
 }
 
 /**
@@ -134,24 +142,31 @@
  */
 - (void)removeFileWithName:(NSString *)name {
     
-    NSError *error;
-    NSString *filePath = [self.storePath stringByAppendingPathComponent:name];
-    if ([self.fileManager fileExistsAtPath:filePath]) {
-        [self.fileManager removeItemAtPath:filePath error:&error];
-        NSAssert(error == nil, @"移除文件失败");
-        
-        // 当文件删除后，使用大小要变化，同时把lru元素g移除
-        if (!error) {
-            long long fileSize = ((NSNumber *)[self.lruCache get:name]).longLongValue;
-            if (self.useStoreSize >= fileSize) {
-                self.useStoreSize -= fileSize;
+//    os_unfair_lock_lock(unfairLock);
+    
+    @synchronized (self) {
+        NSError *error;
+        NSString *filePath = [self.storePath stringByAppendingPathComponent:name];
+        if ([self.fileManager fileExistsAtPath:filePath]) {
+            
+            [self.fileManager removeItemAtPath:filePath error:&error];
+            NSAssert(error == nil, @"移除文件失败");
+            
+            // 当文件删除后，使用大小要变化，同时把lru元素g移除
+            if (!error) {
+                long long fileSize = ((NSNumber *)[self.lruCache get:name]).longLongValue;
+                if (self.useStoreSize >= fileSize) {
+                    self.useStoreSize -= fileSize;
+                }
+                else {
+                    self.useStoreSize = 0;
+                }
+                [self.lruCache removeWithKey:name];
             }
-            else {
-                self.useStoreSize = 0;
-            }
-            [self.lruCache removeWithKey:name];
         }
     }
+    
+//    os_unfair_lock_unlock(unfairLock);
 }
 
 

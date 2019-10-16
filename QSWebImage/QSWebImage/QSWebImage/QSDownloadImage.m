@@ -18,7 +18,8 @@
  @param success 请求成功响应
  @param failure 请求失败响应
  */
-- (void)GET:(NSString *)urlStr param:(NSDictionary *)param success:(BlockRsp)success failure:(BlockErr)failure {
+- (void)GET:(NSString * _Nullable)urlStr param:(NSDictionary * _Nullable)param
+    success:(BlockRsp)success failure:(BlockErr)failure {
     [self method:@"GET" url:urlStr param:param success:success failure:failure];
 }
 
