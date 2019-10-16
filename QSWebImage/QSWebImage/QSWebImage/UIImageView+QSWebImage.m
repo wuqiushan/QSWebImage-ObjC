@@ -12,7 +12,7 @@
 @implementation UIImageView (QSWebImage)
 
 
-- (void)QSImageUrl:(NSString *)urlStr defaultImage:(NSString *)defImage {
+- (void)QSImageUrl:(NSString * _Nullable)urlStr defaultImage:(NSString * _Nullable)defImage {
     
     self.image = [UIImage imageNamed:defImage];
     [[QSWebImageManage sharedInstance] imageDataWithUrl:urlStr setImageView:self];

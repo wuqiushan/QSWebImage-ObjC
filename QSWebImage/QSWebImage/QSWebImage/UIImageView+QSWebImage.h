@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface UIImageView (QSWebImage)
 
-- (void)QSImageUrl:(NSString *)urlStr defaultImage:(NSString *)defImage;
+- (void)QSImageUrl:(NSString * _Nullable)urlStr defaultImage:(NSString * _Nullable)defImage;
 
 @end
 

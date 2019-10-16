@@ -23,20 +23,20 @@
     [super viewDidLoad];
     
     self.imageView = [[UIImageView alloc] init];
-    self.imageView.frame = CGRectMake(10, 250, 350, 150);
+    self.imageView.frame = CGRectMake(10, 250, 350, 100);
     self.imageView.backgroundColor = [UIColor grayColor];
     [self.view addSubview:self.imageView];
     
     
-    UIButton *javaButton = [self createButtonWithName:@"java" x:10 y:100];
+    UIButton *javaButton = [self createButtonWithName:@"java图片" x:10 y:100];
     [javaButton addTarget:self action:@selector(javaButtonAction) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:javaButton];
     
-    UIButton *objcButton = [self createButtonWithName:@"objc" x:10 y:150];
+    UIButton *objcButton = [self createButtonWithName:@"objc图片" x:10 y:150];
     [objcButton addTarget:self action:@selector(objcButtonAction) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:objcButton];
     
-    UIButton *serverButton = [self createButtonWithName:@"server" x:10 y:200];
+    UIButton *serverButton = [self createButtonWithName:@"server图片" x:10 y:200];
     [serverButton addTarget:self action:@selector(serverButtonAction) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:serverButton];
     
@@ -64,7 +64,7 @@
     [testDic putKey:@"key1" value:@"value1"];
     [testDic putKey:@"key2" value:@"value2"];
     [testDic putKey:@"key3" value:@"value3"];
-    id value2 = [testDic get:@"key2"];
+    [testDic get:@"key2"];
     NSLog(@"%@", testDic.description);
     [testDic removeTail];
     NSLog(@"%@", testDic);
@@ -75,7 +75,7 @@
     LruCache *testDic = [[LruCache alloc] init];
     [testDic putKey:@"key1" value:@"value1"];
     [testDic putKey:@"key1" value:@"value2"];
-    id value2 = [testDic get:@"key2"];
+    [testDic get:@"key2"];
     NSLog(@"%@", testDic.description);
     [testDic removeTail];
     NSLog(@"%@", testDic);
@@ -86,7 +86,7 @@
     LruCache *testDic = [[LruCache alloc] init];
     [testDic putKey:@"key1" value:@"value1"];
     [testDic putKey:@"key2" value:@"value2"];
-    id value2 = [testDic get:@"key1"];
+    [testDic get:@"key1"];
     NSLog(@"%@", testDic.description);
     [testDic removeTail];
     NSLog(@"%@", testDic);
@@ -97,7 +97,7 @@
     LruCache *testDic = [[LruCache alloc] init];
     [testDic putKey:@"key1" value:@"value1"];
     [testDic putKey:@"key2" value:@"value2"];
-    id value2 = [testDic get:@"key2"];
+    [testDic get:@"key2"];
     NSLog(@"%@", testDic.description);
     [testDic removeTail];
     NSLog(@"%@", testDic);
