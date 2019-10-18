@@ -158,10 +158,10 @@
 			isa = PBXGroup;
 			children = (
 				AEA1B1D8235964E700774CD1 /* QSBaseClass */,
-				18031A8E2344B8BA00BFAF64 /* QSDiskCache.h */,
-				18031A8F2344B8BA00BFAF64 /* QSDiskCache.m */,
 				18031A912344B8EA00BFAF64 /* QSMemoryCache.h */,
 				18031A922344B8EA00BFAF64 /* QSMemoryCache.m */,
+				18031A8E2344B8BA00BFAF64 /* QSDiskCache.h */,
+				18031A8F2344B8BA00BFAF64 /* QSDiskCache.m */,
 				189F0F462347186A005A78B4 /* QSWebImageManage.h */,
 				189F0F472347186A005A78B4 /* QSWebImageManage.m */,
 				189F0F4023471231005A78B4 /* UIImageView+QSWebImage.h */,
@@ -173,12 +173,12 @@
 		AEA1B1D8235964E700774CD1 /* QSBaseClass */ = {
 			isa = PBXGroup;
 			children = (
-				AEA1B1DF23598E5500774CD1 /* QSDownloadImage.h */,
-				AEA1B1E023598E5500774CD1 /* QSDownloadImage.m */,
 				AEA1B1DA235964E700774CD1 /* QSLru.h */,
 				AEA1B1DC235964E700774CD1 /* QSLru.m */,
 				AEA1B1DB235964E700774CD1 /* QSLruNode.h */,
 				AEA1B1D9235964E700774CD1 /* QSLruNode.m */,
+				AEA1B1DF23598E5500774CD1 /* QSDownloadImage.h */,
+				AEA1B1E023598E5500774CD1 /* QSDownloadImage.m */,
 			);
 			path = QSBaseClass;
 			sourceTree = "<group>";
