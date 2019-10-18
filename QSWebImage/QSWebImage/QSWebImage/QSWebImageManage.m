@@ -54,7 +54,7 @@
         __block NSData *resultData = nil;
         NSString *md5Key = [strongSelf md5_32bit:url];
         
-        resultData = [strongSelf.memoryCache readFileWithName:md5Key];
+        resultData = (NSData *)[strongSelf.memoryCache getObjectWithKey:md5Key];
         if (resultData) {
             [strongSelf showImageView:imgeView imageData:resultData];
             return ;
@@ -63,7 +63,7 @@
         resultData = [strongSelf.dishCache readFileWithName:md5Key];
         if (resultData) {
             [strongSelf showImageView:imgeView imageData:resultData];
-            [strongSelf.memoryCache writeFileWithName:md5Key content:resultData];
+            [strongSelf.memoryCache setObject:resultData withKey:md5Key];
             return ;
         }
         
@@ -73,8 +73,8 @@
                 
                 resultData = (NSData *)rspObject;
                 [strongSelf showImageView:imgeView imageData:resultData];
-                [strongSelf.dishCache writeFileWithName:md5Key content:resultData];
-                [strongSelf.memoryCache writeFileWithName:md5Key content:resultData];
+                [strongSelf.dishCache writeFile:resultData withName:md5Key];
+                [strongSelf.memoryCache setObject:resultData withKey:md5Key];
             }
             
         } failure:^(NSError * _Nonnull error) {

@@ -8,12 +8,17 @@
 
 #import "QSMemoryCache.h"
 #import "QSLru.h"
+#import "QSLruNode.h"
 
 @interface QSMemoryCache()
 
-/** 维护一个 lru  key:文件名，value:NSData */
+/** 维护一个 lru  key:键，value:id */
 @property (nonatomic, strong) QSLru *QSLru;
+
+/** 最大能够内存大小 */
 @property (nonatomic, assign) long long maxMemorySize;
+
+/** 已使内存大小 */
 @property (nonatomic, assign) long long useMemorySize;
 
 @end
@@ -40,29 +45,29 @@
     return self;
 }
 
-- (void)writeFileWithName:(NSString *)name content:(NSData *)data {
+- (void)setObject:(nullable id<NSCoding>)object withKey:(NSString *)key {
     
-    [self removeFileWithName:name];
-    [self.QSLru putKey:name value:data];
-    long long fileSize = data.length;
+    long long fileSize = [self getLengthWithObject:object];
+    [self removeObjectWithKey:key];
+    [self.QSLru putKey:key value:object];
     self.useMemorySize += fileSize;
     
     while (self.useMemorySize > self.maxMemorySize) {
         NSString *tailKey = [self.QSLru getTailKey];
-        [self removeFileWithName:tailKey];
+        [self removeObjectWithKey:tailKey];
     }
 }
 
-- (NSData *)readFileWithName:(NSString *)name {
+- (nullable id)getObjectWithKey:(NSString *)key {
     
-    NSData *data = [self.QSLru get:name];
-    return data;
+    return [self.QSLru get:key];
 }
 
-- (void)removeFileWithName:(NSString *)name {
+- (void)removeObjectWithKey:(NSString *)key {
     
-    NSData *data = [[self.QSLru getAllNode] objectForKey:name];
-    long long fileSize = data.length;
+    QSLruNode *node = [[self.QSLru getAllNode] objectForKey:key];
+    if (node == nil) { return ; }
+    long long fileSize = [self getLengthWithObject:node.value];
     
     if (self.useMemorySize > fileSize) {
         self.useMemorySize -= fileSize;
@@ -70,7 +75,34 @@
     else {
         self.useMemorySize = 0;
     }
-    [self.QSLru removeWithKey:name];
+    [self.QSLru removeWithKey:key];
+}
+
+- (void)removeAllObject {
+    
+    self.QSLru = nil;
+    self.useMemorySize = 0;
+}
+
+#pragma mark 获取对象占用内存
+- (NSUInteger)getLengthWithObject:(nullable id<NSCoding>)object {
+    
+    NSUInteger dataLength = 0;
+    if (object == nil) {
+        return dataLength = 0;
+    }
+    
+    NSObject *dataObject = (NSObject *)object;
+    if ([dataObject isKindOfClass:[NSData class]]) {
+        dataLength = ((NSData *)dataObject).length;
+    }
+    else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        dataLength = [NSKeyedArchiver archivedDataWithRootObject:object].length;
+#pragma clang diagnostic pop
+    }
+    return dataLength;
 }
 
 #pragma mark - 懒加载

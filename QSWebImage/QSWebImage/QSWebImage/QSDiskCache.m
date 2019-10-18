@@ -80,15 +80,14 @@
     return self;
 }
 
-
 /**
  写入文件到磁盘里
  1.如果对应路径有此文件，则先删除，再创建文件，写入数据
 
- @param name 文件名称
  @param data 文件内容
+ @param name 文件名称
  */
-- (void)writeFileWithName:(NSString *)name content:(NSData *)data {
+- (void)writeFile:(NSData *)data withName:(NSString *)name {
     
 //    os_unfair_lock_lock(unfairLock);
     @synchronized (self) {
