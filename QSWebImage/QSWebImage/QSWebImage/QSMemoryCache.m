@@ -7,12 +7,12 @@
 //
 
 #import "QSMemoryCache.h"
-#import "LruCache.h"
+#import "QSLru.h"
 
 @interface QSMemoryCache()
 
 /** 维护一个 lru  key:文件名，value:NSData */
-@property (nonatomic, strong) LruCache *lruCache;
+@property (nonatomic, strong) QSLru *QSLru;
 @property (nonatomic, assign) long long maxMemorySize;
 @property (nonatomic, assign) long long useMemorySize;
 
@@ -43,25 +43,25 @@
 - (void)writeFileWithName:(NSString *)name content:(NSData *)data {
     
     [self removeFileWithName:name];
-    [self.lruCache putKey:name value:data];
+    [self.QSLru putKey:name value:data];
     long long fileSize = data.length;
     self.useMemorySize += fileSize;
     
     while (self.useMemorySize > self.maxMemorySize) {
-        NSString *tailKey = [self.lruCache getTailKey];
+        NSString *tailKey = [self.QSLru getTailKey];
         [self removeFileWithName:tailKey];
     }
 }
 
 - (NSData *)readFileWithName:(NSString *)name {
     
-    NSData *data = [self.lruCache get:name];
+    NSData *data = [self.QSLru get:name];
     return data;
 }
 
 - (void)removeFileWithName:(NSString *)name {
     
-    NSData *data = [self.lruCache.dic objectForKey:name];
+    NSData *data = [[self.QSLru getAllNode] objectForKey:name];
     long long fileSize = data.length;
     
     if (self.useMemorySize > fileSize) {
@@ -70,15 +70,15 @@
     else {
         self.useMemorySize = 0;
     }
-    [self.lruCache removeWithKey:name];
+    [self.QSLru removeWithKey:name];
 }
 
 #pragma mark - 懒加载
-- (LruCache *)lruCache {
-    if (!_lruCache) {
-        _lruCache = [[LruCache alloc] init];
+- (QSLru *)QSLru {
+    if (!_QSLru) {
+        _QSLru = [[QSLru alloc] init];
     }
-    return _lruCache;
+    return _QSLru;
 }
 
 @end

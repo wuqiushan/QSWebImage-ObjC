@@ -7,7 +7,7 @@
 //
 
 #import "ViewController.h"
-#import "LruCache.h"
+#import "QSLru.h"
 #import "UIImageView+QSWebImage.h"
 
 
@@ -60,7 +60,7 @@
 #pragma mark - 测试 Lru 的正确性
 - (void)testLru {
     
-    LruCache *testDic = [[LruCache alloc] init];
+    QSLru *testDic = [[QSLru alloc] init];
     [testDic putKey:@"key1" value:@"value1"];
     [testDic putKey:@"key2" value:@"value2"];
     [testDic putKey:@"key3" value:@"value3"];
@@ -72,7 +72,7 @@
 
 - (void)testLru1 {
     
-    LruCache *testDic = [[LruCache alloc] init];
+    QSLru *testDic = [[QSLru alloc] init];
     [testDic putKey:@"key1" value:@"value1"];
     [testDic putKey:@"key1" value:@"value2"];
     [testDic get:@"key2"];
@@ -83,7 +83,7 @@
 
 - (void)testLru2 {
     
-    LruCache *testDic = [[LruCache alloc] init];
+    QSLru *testDic = [[QSLru alloc] init];
     [testDic putKey:@"key1" value:@"value1"];
     [testDic putKey:@"key2" value:@"value2"];
     [testDic get:@"key1"];
@@ -94,7 +94,7 @@
 
 - (void)testLru3 {
     
-    LruCache *testDic = [[LruCache alloc] init];
+    QSLru *testDic = [[QSLru alloc] init];
     [testDic putKey:@"key1" value:@"value1"];
     [testDic putKey:@"key2" value:@"value2"];
     [testDic get:@"key2"];

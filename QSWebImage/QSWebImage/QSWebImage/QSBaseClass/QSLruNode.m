@@ -1,14 +1,14 @@
 //
-//  LruNode.m
+//  QSLruNode.m
 //  QSWebImage
 //
 //  Created by apple on 2019/10/2.
 //  Copyright © 2019年 wuqiushan. All rights reserved.
 //
 
-#import "LruNode.h"
+#import "QSLruNode.h"
 
-@implementation LruNode
+@implementation QSLruNode
 
 - (instancetype)initWithKey:(NSString *)key value:(id)value {
     

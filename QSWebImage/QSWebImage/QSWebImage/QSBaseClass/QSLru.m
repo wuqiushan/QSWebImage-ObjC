@@ -1,5 +1,5 @@
 //
-//  LruCache.m
+//  QSLru.m
 //  QSWebImage
 //
 //  Created by apple on 2019/10/2.
@@ -12,12 +12,12 @@
  os_unfair_lock_unlock(unfairLock);
  */
 
-#import "LruCache.h"
-#import "LruNode.h"
+#import "QSLru.h"
+#import "QSLruNode.h"
 #import <os/lock.h>
 
 
-@interface LruCache()
+@interface QSLru()
 
 
 /**
@@ -26,16 +26,16 @@
 @property (nonatomic, strong) NSMutableDictionary *dic;
 
 /** 是链表头部节点 */
-@property (nonatomic, strong) LruNode *head;
+@property (nonatomic, strong) QSLruNode *head;
 
 /** 是链表尾部节点 */
-@property (nonatomic, strong) LruNode *tail;
+@property (nonatomic, strong) QSLruNode *tail;
 
 @end
 
 os_unfair_lock unfairLock;
 
-@implementation LruCache
+@implementation QSLru
 
 - (instancetype)init
 {
@@ -47,15 +47,16 @@ os_unfair_lock unfairLock;
 }
 
 /**
- 获取元素,
- 1.该元素存在，且不为头部节点时 先移除链表关联，移到头部重组关联 再返回其值
- 2.该元素不存在，直接返回
-
- @param key 通过key
+ 获取Lru的对应节点的值
+ 1.该节点存在，且不为头部节点时 先移除链表关联，移到头部重组关联 再返回其值
+ 2.该节点不存在，直接返回
+ 
+ @param key 指定获取值的键
+ @return 返回该节点的值
  */
 - (id)get:(NSString *)key {
     
-    LruNode *currNode = [self.dic objectForKey:key];
+    QSLruNode *currNode = [self.dic objectForKey:key];
     if (currNode == nil) {
         return nil;
     }
@@ -67,40 +68,39 @@ os_unfair_lock unfairLock;
 
 
 /**
- 增加元素
+ 往Lru增加节点，通过键和值
  1.如果元素key之前存在的话，去掉链表关联，从字典移除元素
  2.第1步完后，创建节点，把节点放在链表头部
-
- @param key 元素key
- @param value 元素value
+ 
+ @param key 节点的键
+ @param value 节点的值
  */
 - (void)putKey:(NSString *)key value:(id)value {
     
-    LruNode *currNode = [self.dic objectForKey:key];
+    QSLruNode *currNode = [self.dic objectForKey:key];
     if (currNode != nil) {
         [self removeNode:currNode];
     }
     
-    currNode = [[LruNode alloc] initWithKey:key value:value];
+    currNode = [[QSLruNode alloc] initWithKey:key value:value];
     [self addHead:currNode];
 }
 
-
 /**
- 删除最旧的数据，淘汰
- 
+ 删除最旧的数据，即最长时间未使用的那个节点
  */
 - (void)removeTail {
     [self removeNode:self.tail];
 }
 
 /**
- 删除指定的节点，通过key
- 
+ 删除指定的节点
+
+ @param key 节点的键
  */
 - (void)removeWithKey:(NSString *)key {
     
-    LruNode *node = [self.dic objectForKey:key];
+    QSLruNode *node = [self.dic objectForKey:key];
     [self removeNode:node];
 }
 
@@ -112,7 +112,7 @@ os_unfair_lock unfairLock;
 
  @param node 将要删除的节点
  */
-- (void)removeNode:(LruNode *)node {
+- (void)removeNode:(QSLruNode *)node {
     
     if (node == nil) { return ; }
     
@@ -133,13 +133,13 @@ os_unfair_lock unfairLock;
     }
     else if (node == self.tail) {
         
-        LruNode *prevNode = node.prev;
+        QSLruNode *prevNode = node.prev;
         prevNode.next = nil;
         self.tail = prevNode;
     }
     else {
-        LruNode *prevNode = node.prev;
-        LruNode *nextNode = node.next;
+        QSLruNode *prevNode = node.prev;
+        QSLruNode *nextNode = node.next;
         prevNode.next = nextNode;
         nextNode.prev = prevNode;
     }
@@ -155,7 +155,7 @@ os_unfair_lock unfairLock;
 
  @param node 将要增加的节点
  */
-- (void)addHead:(LruNode *)node {
+- (void)addHead:(QSLruNode *)node {
     
     if (node == nil) { return ; }
     
@@ -174,7 +174,7 @@ os_unfair_lock unfairLock;
         self.tail.prev = self.head;
     }
     else {
-        LruNode *temp = self.head;
+        QSLruNode *temp = self.head;
         self.head = node;
         self.head.next = temp;
         temp.prev = self.head;
@@ -184,14 +184,7 @@ os_unfair_lock unfairLock;
     os_unfair_lock_unlock(&unfairLock);
 }
 
-#pragma mark - 懒加载
-- (NSMutableDictionary *)dic {
-    if (!_dic) {
-        _dic = [[NSMutableDictionary alloc] init];
-    }
-    return _dic;
-}
-
+#pragma mark 获取头尾字段
 - (NSString *)getHeadKey {
     if (self.head) {
         return self.head.key;
@@ -216,6 +209,18 @@ os_unfair_lock unfairLock;
         return self.tail.value;
     }
     return nil;
+}
+
+- (NSDictionary *)getAllNode {
+    return self.dic;
+}
+
+#pragma mark - 懒加载
+- (NSMutableDictionary *)dic {
+    if (!_dic) {
+        _dic = [[NSMutableDictionary alloc] init];
+    }
+    return _dic;
 }
 
 @end

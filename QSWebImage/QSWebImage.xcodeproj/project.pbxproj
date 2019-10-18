@@ -15,13 +15,13 @@
 		18031A6523443F2100BFAF64 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 18031A6423443F2100BFAF64 /* main.m */; };
 		18031A6F23443F2100BFAF64 /* QSWebImageTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18031A6E23443F2100BFAF64 /* QSWebImageTests.m */; };
 		18031A7A23443F2100BFAF64 /* QSWebImageUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18031A7923443F2100BFAF64 /* QSWebImageUITests.m */; };
-		18031A8A2344401000BFAF64 /* LruCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 18031A892344401000BFAF64 /* LruCache.m */; };
-		18031A8D2344415C00BFAF64 /* LruNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 18031A8C2344415C00BFAF64 /* LruNode.m */; };
 		18031A902344B8BA00BFAF64 /* QSDiskCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 18031A8F2344B8BA00BFAF64 /* QSDiskCache.m */; };
 		18031A932344B8EA00BFAF64 /* QSMemoryCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 18031A922344B8EA00BFAF64 /* QSMemoryCache.m */; };
 		189F0F4223471231005A78B4 /* UIImageView+QSWebImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 189F0F4123471231005A78B4 /* UIImageView+QSWebImage.m */; };
 		189F0F482347186A005A78B4 /* QSWebImageManage.m in Sources */ = {isa = PBXBuildFile; fileRef = 189F0F472347186A005A78B4 /* QSWebImageManage.m */; };
 		189F0F4E23472B4C005A78B4 /* QSDownloadImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 189F0F4D23472B4C005A78B4 /* QSDownloadImage.m */; };
+		AEA1B1DD235964E700774CD1 /* QSLruNode.m in Sources */ = {isa = PBXBuildFile; fileRef = AEA1B1D9235964E700774CD1 /* QSLruNode.m */; };
+		AEA1B1DE235964E700774CD1 /* QSLru.m in Sources */ = {isa = PBXBuildFile; fileRef = AEA1B1DC235964E700774CD1 /* QSLru.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,10 +58,6 @@
 		18031A7523443F2100BFAF64 /* QSWebImageUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QSWebImageUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		18031A7923443F2100BFAF64 /* QSWebImageUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QSWebImageUITests.m; sourceTree = "<group>"; };
 		18031A7B23443F2100BFAF64 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		18031A882344401000BFAF64 /* LruCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LruCache.h; sourceTree = "<group>"; };
-		18031A892344401000BFAF64 /* LruCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LruCache.m; sourceTree = "<group>"; };
-		18031A8B2344415C00BFAF64 /* LruNode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LruNode.h; sourceTree = "<group>"; };
-		18031A8C2344415C00BFAF64 /* LruNode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LruNode.m; sourceTree = "<group>"; };
 		18031A8E2344B8BA00BFAF64 /* QSDiskCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QSDiskCache.h; sourceTree = "<group>"; };
 		18031A8F2344B8BA00BFAF64 /* QSDiskCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QSDiskCache.m; sourceTree = "<group>"; };
 		18031A912344B8EA00BFAF64 /* QSMemoryCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QSMemoryCache.h; sourceTree = "<group>"; };
@@ -72,6 +68,10 @@
 		189F0F472347186A005A78B4 /* QSWebImageManage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QSWebImageManage.m; sourceTree = "<group>"; };
 		189F0F4C23472B4C005A78B4 /* QSDownloadImage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QSDownloadImage.h; sourceTree = "<group>"; };
 		189F0F4D23472B4C005A78B4 /* QSDownloadImage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QSDownloadImage.m; sourceTree = "<group>"; };
+		AEA1B1D9235964E700774CD1 /* QSLruNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QSLruNode.m; sourceTree = "<group>"; };
+		AEA1B1DA235964E700774CD1 /* QSLru.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QSLru.h; sourceTree = "<group>"; };
+		AEA1B1DB235964E700774CD1 /* QSLruNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QSLruNode.h; sourceTree = "<group>"; };
+		AEA1B1DC235964E700774CD1 /* QSLru.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QSLru.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -157,10 +157,7 @@
 		18031A8723443F4200BFAF64 /* QSWebImage */ = {
 			isa = PBXGroup;
 			children = (
-				18031A882344401000BFAF64 /* LruCache.h */,
-				18031A892344401000BFAF64 /* LruCache.m */,
-				18031A8B2344415C00BFAF64 /* LruNode.h */,
-				18031A8C2344415C00BFAF64 /* LruNode.m */,
+				AEA1B1D8235964E700774CD1 /* QSBaseClass */,
 				18031A8E2344B8BA00BFAF64 /* QSDiskCache.h */,
 				18031A8F2344B8BA00BFAF64 /* QSDiskCache.m */,
 				18031A912344B8EA00BFAF64 /* QSMemoryCache.h */,
@@ -173,6 +170,17 @@
 				189F0F4123471231005A78B4 /* UIImageView+QSWebImage.m */,
 			);
 			path = QSWebImage;
+			sourceTree = "<group>";
+		};
+		AEA1B1D8235964E700774CD1 /* QSBaseClass */ = {
+			isa = PBXGroup;
+			children = (
+				AEA1B1DA235964E700774CD1 /* QSLru.h */,
+				AEA1B1DC235964E700774CD1 /* QSLru.m */,
+				AEA1B1DB235964E700774CD1 /* QSLruNode.h */,
+				AEA1B1D9235964E700774CD1 /* QSLruNode.m */,
+			);
+			path = QSBaseClass;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -307,12 +315,12 @@
 			files = (
 				189F0F4223471231005A78B4 /* UIImageView+QSWebImage.m in Sources */,
 				18031A5A23443F2000BFAF64 /* ViewController.m in Sources */,
+				AEA1B1DD235964E700774CD1 /* QSLruNode.m in Sources */,
+				AEA1B1DE235964E700774CD1 /* QSLru.m in Sources */,
 				189F0F4E23472B4C005A78B4 /* QSDownloadImage.m in Sources */,
 				18031A6523443F2100BFAF64 /* main.m in Sources */,
 				189F0F482347186A005A78B4 /* QSWebImageManage.m in Sources */,
 				18031A5723443F2000BFAF64 /* AppDelegate.m in Sources */,
-				18031A8A2344401000BFAF64 /* LruCache.m in Sources */,
-				18031A8D2344415C00BFAF64 /* LruNode.m in Sources */,
 				18031A902344B8BA00BFAF64 /* QSDiskCache.m in Sources */,
 				18031A932344B8EA00BFAF64 /* QSMemoryCache.m in Sources */,
 			);

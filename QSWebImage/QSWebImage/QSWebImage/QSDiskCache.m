@@ -7,8 +7,8 @@
 //
 
 #import "QSDiskCache.h"
-#import "LruCache.h"
-#import "LruNode.h"
+#import "QSLru.h"
+#import "QSLruNode.h"
 #import <os/lock.h>
 
 /*
@@ -23,7 +23,7 @@
 @interface QSDiskCache()
 
 /** 维护一个 lru  key:文件名，value:文件大小 */
-@property (nonatomic, strong) LruCache *lruCache;
+@property (nonatomic, strong) QSLru *QSLru;
 @property (nonatomic, assign) long long maxStoreSize;
 @property (nonatomic, assign) long long useStoreSize;
 @property (nonatomic, strong) NSString *storePath;
@@ -72,8 +72,8 @@
             }
         }
         
-        // 读取配置文件，初始 lruCache和useStoreSize 变量
-        [self initlruCacheAndSize];
+        // 读取配置文件，初始 QSLru和useStoreSize 变量
+        [self initQSLruAndSize];
         // 通知
         [self initNotify];
     }
@@ -102,10 +102,10 @@
             // 读出存储文件的大小
             long long fileSize = [self getFileSize:name];
             self.useStoreSize += fileSize;
-            [self.lruCache putKey:name value:[NSNumber numberWithLongLong:fileSize]];
+            [self.QSLru putKey:name value:[NSNumber numberWithLongLong:fileSize]];
             
             while (self.useStoreSize > self.maxStoreSize) {
-                NSString *tailKey = [self.lruCache getTailKey];
+                NSString *tailKey = [self.QSLru getTailKey];
                 [self removeFileWithName:tailKey];
             }
         }
@@ -127,7 +127,7 @@
         [handle closeFile];
         
         // 读取完后要把指定的图片 lru 排在头节点
-        [self.lruCache get:name];
+        [self.QSLru get:name];
         
         return fileData;
     }
@@ -154,14 +154,14 @@
             
             // 当文件删除后，使用大小要变化，同时把lru元素g移除
             if (!error) {
-                long long fileSize = ((NSNumber *)[self.lruCache get:name]).longLongValue;
+                long long fileSize = ((NSNumber *)[self.QSLru get:name]).longLongValue;
                 if (self.useStoreSize >= fileSize) {
                     self.useStoreSize -= fileSize;
                 }
                 else {
                     self.useStoreSize = 0;
                 }
-                [self.lruCache removeWithKey:name];
+                [self.QSLru removeWithKey:name];
             }
         }
     }
@@ -209,21 +209,21 @@
 }
 
 
-#pragma mark - lruCache 处理
+#pragma mark - QSLru 处理
 
 
 /**
- 当程序启动时，把上次lruCache记录读出来供本次使用
+ 当程序启动时，把上次QSLru记录读出来供本次使用
  1.把plist文件读取出来
- 2.然后遍历，填充在lruCache变量中
- 3.遍历所有文件，如果在lruCache中找不到就删除
- (注意不能用LruCacheget类中的get方法，因为get会导致Lru链表重新排序，直接 类.dic 操作)
+ 2.然后遍历，填充在QSLru变量中
+ 3.遍历所有文件，如果在QSLru中找不到就删除
+ (注意不能用QSLruget类中的get方法，因为get会导致Lru链表重新排序，直接 类.dic 操作)
  4.计算当前使用存储大小
  */
-- (void)initlruCacheAndSize {
+- (void)initQSLruAndSize {
     
-    NSString *lruCachePath = [self.storePath stringByAppendingPathComponent:@"lruCache.plist"];
-    NSDictionary *dic = [NSDictionary dictionaryWithContentsOfFile:lruCachePath];
+    NSString *QSLruPath = [self.storePath stringByAppendingPathComponent:@"QSLru.plist"];
+    NSDictionary *dic = [NSDictionary dictionaryWithContentsOfFile:QSLruPath];
     if (!dic) {
         self.useStoreSize = 0;
     }
@@ -235,7 +235,7 @@
             NSDictionary *contentDic = [dic objectForKey:tail];
             long long size = [[contentDic objectForKey:@"size"] longLongValue];
             NSNumber *value = [NSNumber numberWithLongLong:size];
-            [self.lruCache putKey:tail value:value];
+            [self.QSLru putKey:tail value:value];
             
             tail = [contentDic objectForKey:@"prev"];
         }
@@ -247,11 +247,11 @@
         while (element = [enumerator nextObject]) {
             NSString *elementStr = (NSString *)element;
             if ([elementStr isEqualToString:@".DS_Store"] ||
-                [elementStr isEqualToString:@"lruCache.plist"]) {
+                [elementStr isEqualToString:@"QSLru.plist"]) {
                 continue ;
             }
             
-            if (![self.lruCache.dic objectForKey:elementStr]) {
+            if (![[self.QSLru getAllNode] objectForKey:elementStr]) {
                 [self removeFileWithName:elementStr];
             }
         }
@@ -266,9 +266,9 @@
  */
 - (void)initNotify {
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(savelruCache) name:UIApplicationWillResignActiveNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(savelruCache) name:UIApplicationDidEnterBackgroundNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(savelruCache) name:UIApplicationWillTerminateNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveQSLru) name:UIApplicationWillResignActiveNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveQSLru) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveQSLru) name:UIApplicationWillTerminateNotification object:nil];
 }
 
 - (void)dealloc
@@ -285,16 +285,16 @@
  2.把转化后的字典用plist文件存储在对应的位置上
  
  */
-- (void)savelruCache {
+- (void)saveQSLru {
     
     NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
-    if (!self.lruCache.getTailKey) {
+    if (!self.QSLru.getTailKey) {
         return ;
     }
-    [dic setObject:self.lruCache.getTailKey forKey:@"tail"];
-    [self.lruCache.dic enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-        if ([obj isKindOfClass:[LruNode class]]) {
-            LruNode *node = (LruNode *)obj;
+    [dic setObject:self.QSLru.getTailKey forKey:@"tail"];
+    [[self.QSLru getAllNode] enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        if ([obj isKindOfClass:[QSLruNode class]]) {
+            QSLruNode *node = (QSLruNode *)obj;
             NSMutableDictionary *subDic = [[NSMutableDictionary alloc] init];
             if (node.value) {
                 [subDic setObject:node.value forKey:@"size"];
@@ -306,13 +306,13 @@
         }
     }];
     
-    NSString *lruCachePath = [self.storePath stringByAppendingPathComponent:@"lruCache.plist"];
-    if ([self.fileManager fileExistsAtPath:lruCachePath]) {
+    NSString *QSLruPath = [self.storePath stringByAppendingPathComponent:@"QSLru.plist"];
+    if ([self.fileManager fileExistsAtPath:QSLruPath]) {
         NSError *error;
-        [self.fileManager removeItemAtPath:lruCachePath error:&error];
-        NSAssert(error == nil, @"保存配置lruCache时，删除之前的plist出错");
+        [self.fileManager removeItemAtPath:QSLruPath error:&error];
+        NSAssert(error == nil, @"保存配置QSLru时，删除之前的plist出错");
     }
-    [dic writeToFile:lruCachePath atomically:YES];
+    [dic writeToFile:QSLruPath atomically:YES];
 }
 
 #pragma mark - 懒加载
@@ -323,11 +323,11 @@
     return _fileManager;
 }
 
-- (LruCache *)lruCache {
-    if (!_lruCache) {
-        _lruCache = [[LruCache alloc] init];
+- (QSLru *)QSLru {
+    if (!_QSLru) {
+        _QSLru = [[QSLru alloc] init];
     }
-    return _lruCache;
+    return _QSLru;
 }
 
 @end
