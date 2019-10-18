@@ -15,7 +15,18 @@ typedef void(^BlockErr)(NSError *error);
 
 @interface QSDownloadImage : NSObject
 
-- (void)GET:(NSString * _Nullable)urlStr param:(NSDictionary * _Nullable)param success:(BlockRsp)success failure:(BlockErr)failure;
+/**
+ 下载图片，直接获取NSData类型的图片数据
+
+ @param urlStr 请求的url
+ @param param 请求参数
+ @param success 请求成功回调
+ @param failure 请求失败回调
+ */
+- (void)GET:(NSString * _Nullable)urlStr
+      param:(NSDictionary * _Nullable)param
+    success:(BlockRsp)success
+    failure:(BlockErr)failure;
 
 @end
 

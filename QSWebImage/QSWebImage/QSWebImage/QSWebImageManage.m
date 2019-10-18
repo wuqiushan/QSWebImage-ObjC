@@ -39,11 +39,10 @@
 
 /**
  获取图片数据
- 1.把UrlStr 转化成MD5
+ 1.把UrlStr转化成MD5 生成key
  2.从内存取，有则显示，无则下一步
- 3.从磁盘取，有则显示，无则下一步
- 3.从网络上去下载，完成显示，下一步
- 4.存储到磁盘，存储到内存
+ 3.从磁盘取，有则显示(存内存)，无则下一步
+ 4.从网络上去下载(存内存，存磁盘)，然后显示
  */
 - (void)imageDataWithUrl:(NSString *)url setImageView:(UIImageView *)imgeView {
     
@@ -52,23 +51,18 @@
         
         NSLog(@"1001 - %@", [NSThread currentThread]);
         __strong typeof(weakSelf) strongSelf = weakSelf;
-        
-        NSString *md5Key = [strongSelf md5_32bit:url];
         __block NSData *resultData = nil;
+        NSString *md5Key = [strongSelf md5_32bit:url];
+        
         resultData = [strongSelf.memoryCache readFileWithName:md5Key];
         if (resultData) {
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                imgeView.image = [UIImage imageWithData:resultData];
-            });
+            [strongSelf showImageView:imgeView imageData:resultData];
             return ;
         }
+        
         resultData = [strongSelf.dishCache readFileWithName:md5Key];
         if (resultData) {
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                imgeView.image = [UIImage imageWithData:resultData];
-            });
+            [strongSelf showImageView:imgeView imageData:resultData];
             [strongSelf.memoryCache writeFileWithName:md5Key content:resultData];
             return ;
         }
@@ -78,12 +72,7 @@
             if ([rspObject isKindOfClass:[NSData class]]) {
                 
                 resultData = (NSData *)rspObject;
-                //NSLog(@"%ld %@", resultData.length, resultData);
-                
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    imgeView.image = [UIImage imageWithData:resultData];
-                });
-                
+                [strongSelf showImageView:imgeView imageData:resultData];
                 [strongSelf.dishCache writeFileWithName:md5Key content:resultData];
                 [strongSelf.memoryCache writeFileWithName:md5Key content:resultData];
             }
@@ -97,6 +86,20 @@
     NSOperationQueue *operationQueue = [[NSOperationQueue alloc] init];
     operationQueue.maxConcurrentOperationCount = 20;
     [operationQueue addOperation:blockOperation];
+}
+
+
+/**
+ 把图片视图展示
+
+ @param imgeView 图片视图
+ @param data 展示的图片数据
+ */
+- (void)showImageView:(UIImageView *)imgeView imageData:(NSData *)data {
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        imgeView.image = [UIImage imageWithData:data];
+    });
 }
 
 
