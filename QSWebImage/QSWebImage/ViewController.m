@@ -28,15 +28,15 @@
     [self.view addSubview:self.imageView];
     
     
-    UIButton *javaButton = [self createButtonWithName:@"java图片" x:10 y:100];
+    UIButton *javaButton = [self createButtonWithName:@"图片(Java)" x:10 y:100];
     [javaButton addTarget:self action:@selector(javaButtonAction) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:javaButton];
     
-    UIButton *objcButton = [self createButtonWithName:@"objc图片" x:10 y:150];
+    UIButton *objcButton = [self createButtonWithName:@"图片(iOS)" x:10 y:150];
     [objcButton addTarget:self action:@selector(objcButtonAction) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:objcButton];
     
-    UIButton *serverButton = [self createButtonWithName:@"server图片" x:10 y:200];
+    UIButton *serverButton = [self createButtonWithName:@"图片(Server)" x:10 y:200];
     [serverButton addTarget:self action:@selector(serverButtonAction) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:serverButton];
     
