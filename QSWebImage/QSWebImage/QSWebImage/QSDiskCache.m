@@ -96,10 +96,10 @@
         BOOL isSuccess = [self.fileManager createFileAtPath:filePath contents:data attributes:nil];
         NSAssert(isSuccess == true, @"写入文件失败");
         
-        // 如果文件总大小超过域值就是循环去删除，直到文件合理
+        // 如果文件总大小超过域值就是循环去删除，直到文件大小合理
         if (isSuccess) {
             // 读出存储文件的大小
-            long long fileSize = [self getFileSize:name];
+            long long fileSize = [self getDiskFileSize:name];
             self.useStoreSize += fileSize;
             [self.QSLru putKey:name value:[NSNumber numberWithLongLong:fileSize]];
             
@@ -170,39 +170,65 @@
 
 
 /**
- 获取所有文件大小
+ 获取磁盘缓存总大小
 
  @return 返回所有文件大小值
  */
-- (long long)getDirectorySize {
-    return [self getFileSize:nil];
+- (long long)getDiskUseSize {
+    return [self calcuFileSize:self.storePath];
 }
 
+/**
+ 获取指定文件大小
+
+ @param fileName 指定文件名
+ @return 指文件大小
+ */
+- (long long)getDiskFileSize:(NSString *)fileName {
+    
+    NSString *filePath = self.storePath;
+    if ((fileName != nil) && (fileName.length > 0)) {
+        filePath = [filePath stringByAppendingPathComponent:fileName];
+        return [self calcuFileSize:filePath];
+    }
+    return 0;
+}
 
 /**
- 获取指定的文件大小
+ 获取指定的文件或文件夹大小(支持多级目录)，使用递归方式
 
- @param name 文件名称
- @return 返回指定文件的大小
+ @param filePath 传文件或文件夹全路径, 传nil读文件夹
+ @return 返回指定文件或文件夹的大小
  */
-- (long long)getFileSize:(NSString *)name {
+- (long long)calcuFileSize:(NSString *)filePath {
     
     unsigned long long fileLength = 0;
     NSError *error;
-    NSString *filePath = self.storePath;
-    if ((name != nil) && (name.length > 0)) {
-        filePath = [filePath stringByAppendingPathComponent:name];
-    }
+    
     if ([self.fileManager fileExistsAtPath:filePath]) {
-        NSDictionary *dic =[self.fileManager attributesOfItemAtPath:self.storePath error:&error];
-        if (error) {
-            return 0;
+        
+        BOOL isDirectory = NO;
+        [self.fileManager fileExistsAtPath:filePath isDirectory:&isDirectory];
+        // 读文件夹（支持多级目录）
+        if (isDirectory) {
+            NSEnumerator *childEnumerator = [[self.fileManager subpathsAtPath:filePath] objectEnumerator];
+            NSString *fileName;
+            while ((fileName = [childEnumerator nextObject]) != nil) {
+                NSString *fileElementPath = [filePath stringByAppendingPathComponent:fileName];
+                fileLength += [self calcuFileSize:fileElementPath];
+            }
         }
+        // 读文件
         else {
-            // 这里有个问题，用方法读出来要远小于用mac直接查看的值
-            fileLength = [dic fileSize];
-            return fileLength * 1000 / 8;
+            NSDictionary *dic =[self.fileManager attributesOfItemAtPath:filePath error:&error];
+            if (error) {
+                return 0;
+            }
+            else {
+                fileLength = [dic fileSize];
+            }
         }
+        return fileLength;
     }
     return 0;
 }
@@ -255,7 +281,7 @@
             }
         }
         
-        self.useStoreSize = [self getDirectorySize];
+        self.useStoreSize = [self getDiskUseSize];
     }
 }
 

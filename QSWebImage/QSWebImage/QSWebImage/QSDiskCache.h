@@ -43,11 +43,27 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)removeFileWithName:(NSString *)name;
 
 /**
- 获取所有文件大小
+ 获取磁盘缓存大小
  
  @return 返回所有文件大小值
  */
-- (long long)getDirectorySize;
+- (long long)getDiskUseSize;
+
+/**
+ 获取指定文件大小
+ 
+ @param fileName 指定文件名
+ @return 指文件大小
+ */
+- (long long)getDiskFileSize:(NSString *)fileName;
+
+/**
+ 获取指定的文件或文件夹大小(支持多级目录)，使用递归方式
+ 
+ @param filePath 传文件或文件夹全路径, 传nil读文件夹
+ @return 返回指定文件或文件夹的大小
+ */
+- (long long)calcuFileSize:(NSString *)filePath;
 
 @end
 
