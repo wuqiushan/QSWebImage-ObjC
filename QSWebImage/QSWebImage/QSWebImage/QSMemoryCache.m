@@ -39,7 +39,7 @@
     self = [super init];
     if (self) {
         if (self.maxMemorySize == 0) {
-            self.maxMemorySize = 500 * 1024;
+            self.maxMemorySize = 100 * 1024 * 1024; // 100M大小
         }
     }
     return self;

@@ -50,7 +50,7 @@
 //        unfairLock = &(OS_UNFAIR_LOCK_INIT);
         
         if (self.maxStoreSize == 0) {
-            self.maxStoreSize = 500 * 1024;
+            self.maxStoreSize = 500 * 1024 * 1024; // 500M大小
         }
         if (self.storePath == nil) {
             // 默认路径： ../caches/QSWebImage
