@@ -28,7 +28,7 @@
 * QSWebImageManage：图片缓存管理类
 * UIImageView+QSWebImage：UIImageView分类，方便调用
 #### 流程图
-![image](https://github.com/wuqiushan/QSCache-ObjC/blob/master/图片缓存时序图.jpg)
+![image](https://github.com/wuqiushan/QSWebImage-ObjC/blob/master/%E5%9B%BE%E7%89%87%E7%BC%93%E5%AD%98%E6%97%B6%E5%BA%8F%E5%9B%BE.jpg)
 ![image](https://github.com/wuqiushan/QSCache-ObjC/blob/master/链表图.jpg)
 
 #### 思路
